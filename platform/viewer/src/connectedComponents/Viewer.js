@@ -11,7 +11,7 @@ import ConnectedStudyBrowser from './ConnectedStudyBrowser.js';
 import ConnectedViewerMain from './ConnectedViewerMain.js';
 import SidePanel from './../components/SidePanel.js';
 import ErrorBoundaryDialog from './../components/ErrorBoundaryDialog';
-import { extensionManager } from './../App.js';
+import { extensionManager, servicesManager } from './../App.js';
 import { ReconstructionIssues } from './../../../core/src/enums.js';
 
 // Contexts
@@ -66,6 +66,24 @@ class Viewer extends Component {
 
     const { activeServer } = this.props;
     const server = Object.assign({}, activeServer);
+
+    DICOMSR.init({
+      onLog: ({ type, message }) => {
+        const {
+          UINotificationService,
+          LoggerService,
+        } = servicesManager.services;
+        if (UINotificationService) {
+          UINotificationService.show({
+            type,
+            message,
+          });
+        }
+        if (LoggerService) {
+          LoggerService.error({ message, displayOnConsole: false });
+        }
+      },
+    });
 
     OHIF.measurements.MeasurementApi.setConfiguration({
       dataExchange: {
@@ -381,7 +399,7 @@ export default withDialog(Viewer);
  * @param {*object} displaySet
  * @returns {[string]} an array of strings containing the warnings
  */
-const _checkForSeriesInconsistencesWarnings = async function (displaySet) {
+const _checkForSeriesInconsistencesWarnings = async function(displaySet) {
   // NOTE: at the moment this function is async even if it does not perfom any heavy calculation.
   //       We may add or move here some of the computations
   //       done when creating the displaySet (see makeDisplaySet and isDisplaySetReconstructable).
@@ -391,38 +409,51 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet) {
     displaySet.warningIssues.forEach(warning => {
       switch (warning) {
         case ReconstructionIssues.DATASET_4D:
-          warningsList.push("The dataset is 4D.");
+          warningsList.push('The dataset is 4D.');
           break;
         case ReconstructionIssues.VARYING_IMAGESDIMENSIONS:
-          warningsList.push("The dataset frames have different dimensions (rows, columns).");
+          warningsList.push(
+            'The dataset frames have different dimensions (rows, columns).'
+          );
           break;
         case ReconstructionIssues.VARYING_IMAGESCOMPONENTS:
-          warningsList.push("The dataset frames have different components (Sample per pixel).");
+          warningsList.push(
+            'The dataset frames have different components (Sample per pixel).'
+          );
           break;
         case ReconstructionIssues.VARYING_IMAGESORIENTATION:
-          warningsList.push("The dataset frames have different orientation.");
+          warningsList.push('The dataset frames have different orientation.');
           break;
         case ReconstructionIssues.IRREGULAR_SPACING:
-          warningsList.push("The dataset frames have different pixel spacing.");
+          warningsList.push('The dataset frames have different pixel spacing.');
           break;
         case ReconstructionIssues.MULTIFFRAMES:
-          warningsList.push("The dataset is a multiframes.");
+          warningsList.push('The dataset is a multiframes.');
           break;
         default:
           break;
       }
     });
-      warningsList.push('The datasets is not a reconstructable 3D volume. MPR mode is not available.');
+    warningsList.push(
+      'The datasets is not a reconstructable 3D volume. MPR mode is not available.'
+    );
   }
 
-  if (displaySet.missingFrames &&
+  if (
+    displaySet.missingFrames &&
     (!displaySet.warningIssues ||
-      (displaySet.warningIssues && !displaySet.warningIssues.find(warn => warn === ReconstructionIssues.DATASET_4D)))) {
-    warningsList.push('The datasets is missing frames: ' + displaySet.missingFrames + '.');
+      (displaySet.warningIssues &&
+        !displaySet.warningIssues.find(
+          warn => warn === ReconstructionIssues.DATASET_4D
+        )))
+  ) {
+    warningsList.push(
+      'The datasets is missing frames: ' + displaySet.missingFrames + '.'
+    );
   }
 
-  return warningsList
-}
+  return warningsList;
+};
 
 /**
  * What types are these? Why do we have "mapping" dropped in here instead of in
@@ -463,7 +494,7 @@ const _mapStudiesToThumbnails = function(studies) {
         altImageText = displaySet.Modality ? displaySet.Modality : 'UN';
       }
 
-      const hasWarnings = _checkForSeriesInconsistencesWarnings(displaySet)
+      const hasWarnings = _checkForSeriesInconsistencesWarnings(displaySet);
 
       return {
         imageId,
