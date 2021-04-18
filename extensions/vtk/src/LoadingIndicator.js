@@ -8,6 +8,7 @@ class LoadingIndicator extends PureComponent {
   static propTypes = {
     percentComplete: PropTypes.number.isRequired,
     error: PropTypes.object,
+    t: PropTypes.func,
   };
 
   static defaultProps = {
@@ -20,14 +21,14 @@ class LoadingIndicator extends PureComponent {
     if (this.props.percentComplete && this.props.percentComplete !== 100) {
       percComplete = `${this.props.percentComplete}%`;
     }
-
+    const { t } = this.props;
     return (
       <React.Fragment>
         {this.props.error ? (
           <div className="imageViewerErrorLoadingIndicator loadingIndicator">
             <div className="indicatorContents">
-              <h4>Error Loading Image</h4>
-              <p className="description">An error has occurred.</p>
+              <h4>{t('Error Loading Image')}</h4>
+              <p className="description">{t('An error has occurred')}</p>
               <p className="details">{this.props.error.message}</p>
             </div>
           </div>

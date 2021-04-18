@@ -404,7 +404,7 @@ class MetadataProvider {
 
         let patientName;
         if (PatientName) {
-          patientName = PatientName.Alphabetic;
+          patientName = PatientName.Alphabetic || PatientName;
         }
 
         metadata = {

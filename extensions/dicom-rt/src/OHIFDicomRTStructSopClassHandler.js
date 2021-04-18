@@ -15,7 +15,7 @@ const OHIFDicomRTStructSopClassHandler = {
   id: 'OHIFDicomRTStructSopClassHandler',
   type: MODULE_TYPES.SOP_CLASS_HANDLER,
   sopClassUIDs,
-  getDisplaySetFromSeries: function (
+  getDisplaySetFromSeries: function(
     series,
     study,
     dicomWebClient,
@@ -41,7 +41,8 @@ const OHIFDicomRTStructSopClassHandler = {
       Modality: 'RTSTRUCT',
       displaySetInstanceUID: utils.guid(),
       wadoRoot: study.getData().wadoRoot,
-      wadoUri: instance.getData().wadouri,
+      // wadoUri: instance.getData().wadouri,
+      wadoUri: metadata.WadoUri,
       SOPInstanceUID,
       SeriesInstanceUID,
       StudyInstanceUID,
@@ -71,11 +72,11 @@ const OHIFDicomRTStructSopClassHandler = {
       }
     }
 
-    rtStructDisplaySet.getSourceDisplaySet = function (studies) {
+    rtStructDisplaySet.getSourceDisplaySet = function(studies) {
       return getSourceDisplaySet(studies, rtStructDisplaySet);
     };
 
-    rtStructDisplaySet.load = function (referencedDisplaySet, studies) {
+    rtStructDisplaySet.load = function(referencedDisplaySet, studies) {
       return loadRTStruct(
         rtStructDisplaySet,
         referencedDisplaySet,

@@ -45,7 +45,8 @@ export default function getSopClassHandlerModule({ servicesManager }) {
         Modality: 'SEG',
         displaySetInstanceUID: utils.guid(),
         wadoRoot: study.getData().wadoRoot,
-        wadoUri: instance.getData().wadouri,
+        // wadoUri: instance.getData().wadouri,
+        wadoUri: metadata.WadoUri,
         SOPInstanceUID,
         SeriesInstanceUID,
         StudyInstanceUID,
@@ -60,11 +61,19 @@ export default function getSopClassHandlerModule({ servicesManager }) {
         SeriesTime,
         SeriesNumber,
         SeriesDescription,
-        metadata,
       };
 
-      segDisplaySet.getSourceDisplaySet = function(studies, activateLabelMap = true, onDisplaySetLoadFailureHandler) {
-        return getSourceDisplaySet(studies, segDisplaySet, activateLabelMap, onDisplaySetLoadFailureHandler);
+      segDisplaySet.getSourceDisplaySet = function(
+        studies,
+        activateLabelMap = true,
+        onDisplaySetLoadFailureHandler
+      ) {
+        return getSourceDisplaySet(
+          studies,
+          segDisplaySet,
+          activateLabelMap,
+          onDisplaySetLoadFailureHandler
+        );
       };
 
       segDisplaySet.load = async function(referencedDisplaySet, studies) {

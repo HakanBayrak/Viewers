@@ -511,8 +511,10 @@ export default class TimepointApi {
 
   // Return only the timepoints for the given study
   study(StudyInstanceUID) {
-    return this.all().filter(timepoint =>
-      timepoint.studyInstanceUIDs.includes(StudyInstanceUID)
+    return this.all().filter(
+      timepoint =>
+        timepoint.studyInstanceUIDs &&
+        timepoint.studyInstanceUIDs.includes(StudyInstanceUID)
     );
   }
 

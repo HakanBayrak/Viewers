@@ -1,0 +1,9 @@
+{
+  "Cancel": "$t(Buttons:Cancel)",
+  "No hotkeys found": "No hotkeys are configured for this application. Hotkeys can be configured in the application's app-config.js file.",
+  "Reset to Defaults": "$t(Buttons:Reset to Defaults)",
+  "ResetDefaultMessage": "Tercihler başarıyla ilk haline getirildi. <br /> Bu işlem için <strong>Kayıt</strong> etmelisiniz.",
+  "Save": "$t(Buttons:Save)",
+  "SaveMessage": "Tercihler Kaydedildi",
+  "User Preferences": "Kullanıcı Tercihleri"
+}

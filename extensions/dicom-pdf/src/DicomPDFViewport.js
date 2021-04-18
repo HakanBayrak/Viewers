@@ -2,6 +2,7 @@ import React, { Component, createRef } from 'react';
 import dicomParser from 'dicom-parser';
 import PDFJS from 'pdfjs-dist';
 import PropTypes from 'prop-types';
+import { withTranslation } from 'react-i18next';
 
 import TypedArrayProp from './TypedArrayProp';
 import './DicomPDFViewport.css';
@@ -38,6 +39,7 @@ class DicomPDFViewport extends Component {
     activeViewportIndex: PropTypes.number,
     setViewportActive: PropTypes.func,
     viewportIndex: PropTypes.number,
+    t: PropTypes.func,
   };
 
   static defaultProps = {
@@ -228,7 +230,9 @@ class DicomPDFViewport extends Component {
                 <button data-pager="+" onClick={this.onZoomChange}>
                   {`+`}
                 </button>
-                <button onClick={this.downloadPDFCanvas}>Download</button>
+                <button onClick={this.downloadPDFCanvas}>
+                  {this.props.t('Download')}
+                </button>
               </div>
             </div>
             <div id="canvas">
@@ -259,4 +263,4 @@ class DicomPDFViewport extends Component {
   }
 }
 
-export default DicomPDFViewport;
+export default withTranslation('Common')(DicomPDFViewport);

@@ -7,6 +7,7 @@ import { extensionManager } from './../App.js';
 import ConnectedViewer from '../connectedComponents/ConnectedViewer';
 import ConnectedViewerRetrieveStudyData from '../connectedComponents/ConnectedViewerRetrieveStudyData';
 import NotFound from '../routes/NotFound';
+import { withTranslation } from 'react-i18next';
 
 const { log, metadata, utils } = OHIF;
 const { studyMetadataManager } = utils;
@@ -26,14 +27,16 @@ class StandaloneRouting extends Component {
     location: PropTypes.object,
     store: PropTypes.object,
     setServers: PropTypes.func,
+    t: PropTypes.func,
   };
 
   parseQueryAndRetrieveDICOMWebData(query) {
     return new Promise((resolve, reject) => {
       const url = query.url;
+      const { t } = this.props;
 
       if (!url) {
-        return reject(new Error('No URL was specified. Use ?url=$yourURL'));
+        return reject(new Error(t('No URL was specified. Use ?url=$yourURL')));
       }
 
       // Define a request to the server to retrieve the study data
@@ -42,7 +45,7 @@ class StandaloneRouting extends Component {
 
       // Add event listeners for request failure
       oReq.addEventListener('error', error => {
-        log.warn('An error occurred while retrieving the JSON data');
+        log.warn(t('An error occurred while retrieving the JSON data'));
         reject(error);
       });
 
@@ -50,14 +53,14 @@ class StandaloneRouting extends Component {
       // and render the OHIF Viewer with this data
       oReq.addEventListener('load', event => {
         if (event.target.status === 404) {
-          reject(new Error('No JSON data found'));
+          reject(new Error(t('No JSON data found')));
         }
 
         // Parse the response content
         // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/responseText
         if (!oReq.responseText) {
           log.warn('Response was undefined');
-          reject(new Error('Response was undefined'));
+          reject(new Error(t('Response was undefined')));
         }
 
         log.info(JSON.stringify(oReq.responseText, null, 2));
@@ -162,15 +165,19 @@ class StandaloneRouting extends Component {
   }
 
   render() {
+    const { t } = this.props;
     const message = this.state.error
       ? `Error: ${JSON.stringify(this.state.error)}`
-      : 'Loading...';
+      : t('Loading...');
     if (this.state.error || this.state.loading) {
       return <NotFound message={message} showGoBackButton={this.state.error} />;
     }
 
     return this.state.studies ? (
-      <ConnectedViewer studies={this.state.studies} />
+      <ConnectedViewer
+        studies={this.state.studies}
+        studyInstanceUIDs={this.state.studyInstanceUIDs}
+      />
     ) : (
       <ConnectedViewerRetrieveStudyData
         studyInstanceUIDs={this.state.studyInstanceUIDs}
@@ -207,4 +214,4 @@ const _mapStudiesToNewFormat = studies => {
   };
 };
 
-export default StandaloneRouting;
+export default withTranslation('Common')(StandaloneRouting);

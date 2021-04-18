@@ -99,6 +99,15 @@ const definitions = [
     commandOptions: { toolName: 'Angle' },
   },
   {
+    id: 'CobbAngle',
+    label: 'CobbAngle',
+    icon: 'angle-double-down',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'setToolActive',
+    commandOptions: { toolName: 'CobbAngle' },
+  },
+  {
     id: 'Reset',
     label: 'Reset',
     icon: 'reset',

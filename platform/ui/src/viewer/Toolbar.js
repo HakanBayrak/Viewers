@@ -68,6 +68,12 @@ function getDefaultButtonData() {
       icon: 'fa fa-angle-left',
     },
     {
+      id: 'cobbangle',
+      title: 'Cobb Angle Measurement',
+      className: 'imageViewerTool',
+      icon: 'fa fa-angle-double-down',
+    },
+    {
       id: 'dragProbe',
       title: 'Pixel Probe',
       className: 'imageViewerTool',

@@ -62,6 +62,7 @@ class Viewer extends Component {
     activeViewportIndex: PropTypes.number.isRequired,
     isStudyLoaded: PropTypes.bool,
     dialog: PropTypes.object,
+    t: PropTypes.func,
   };
 
   constructor(props) {
@@ -390,7 +391,10 @@ export default withDialog(Viewer);
  * @param {*object} displaySet
  * @returns {[string]} an array of strings containing the warnings
  */
-const _checkForSeriesInconsistencesWarnings = async function (displaySet, studies) {
+const _checkForSeriesInconsistencesWarnings = async function(
+  displaySet,
+  studies
+) {
   const warningsList = [];
 
   if (displaySet.Modality !== 'SEG') {
@@ -401,16 +405,22 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
             warningsList.push('The dataset is 4D.');
             break;
           case ReconstructionIssues.VARYING_IMAGESDIMENSIONS:
-            warningsList.push('The dataset frames have different dimensions (rows, columns).');
+            warningsList.push(
+              'The dataset frames have different dimensions (rows, columns).'
+            );
             break;
           case ReconstructionIssues.VARYING_IMAGESCOMPONENTS:
-            warningsList.push('The dataset frames have different components (Sample per pixel).');
+            warningsList.push(
+              'The dataset frames have different components (Sample per pixel).'
+            );
             break;
           case ReconstructionIssues.VARYING_IMAGESORIENTATION:
             warningsList.push('The dataset frames have different orientation.');
             break;
           case ReconstructionIssues.IRREGULAR_SPACING:
-            warningsList.push('The dataset frames have different pixel spacing.');
+            warningsList.push(
+              'The dataset frames have different pixel spacing.'
+            );
             break;
           case ReconstructionIssues.MULTIFFRAMES:
             warningsList.push('The dataset is a multiframes.');
@@ -419,13 +429,22 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
             break;
         }
       });
-      warningsList.push('The datasets is not a reconstructable 3D volume. MPR mode is not available.');
+      warningsList.push(
+        'The datasets is not a reconstructable 3D volume. MPR mode is not available.'
+      );
     }
 
-    if (displaySet.missingFrames &&
+    if (
+      displaySet.missingFrames &&
       (!displaySet.warningIssues ||
-        (displaySet.warningIssues && !displaySet.warningIssues.find(warn => warn === ReconstructionIssues.DATASET_4D)))) {
-      warningsList.push('The datasets is missing frames: ' + displaySet.missingFrames + '.');
+        (displaySet.warningIssues &&
+          !displaySet.warningIssues.find(
+            warn => warn === ReconstructionIssues.DATASET_4D
+          )))
+    ) {
+      warningsList.push(
+        'The datasets is missing frames: ' + displaySet.missingFrames + '.'
+      );
     }
   } else {
     const segMetadata = displaySet.metadata;
@@ -440,11 +459,13 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
     }
 
     for (
-      let i = 0, groupsLen = segMetadata.PerFrameFunctionalGroupsSequence.length;
+      let i = 0,
+        groupsLen = segMetadata.PerFrameFunctionalGroupsSequence.length;
       i < groupsLen;
       ++i
     ) {
-      const PerFrameFunctionalGroups = segMetadata.PerFrameFunctionalGroupsSequence[i];
+      const PerFrameFunctionalGroups =
+        segMetadata.PerFrameFunctionalGroupsSequence[i];
       if (!PerFrameFunctionalGroups) {
         continue;
       }
@@ -454,29 +475,27 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
         SourceImageSequence = segMetadata.SourceImageSequence[i];
       } else if (PerFrameFunctionalGroups.DerivationImageSequence) {
         SourceImageSequence =
-          PerFrameFunctionalGroups.DerivationImageSequence
-            .SourceImageSequence;
+          PerFrameFunctionalGroups.DerivationImageSequence.SourceImageSequence;
       }
       if (!SourceImageSequence) {
         if (warningsList.length === 0) {
-          const warningMessage = 'The segmentation ' +
+          const warningMessage =
+            'The segmentation ' +
             'has frames out of plane respect to the source images.';
           warningsList.push(warningMessage);
         }
         continue;
       }
 
-      const {
-        ReferencedSOPInstanceUID,
-      } = SourceImageSequence;
+      const { ReferencedSOPInstanceUID } = SourceImageSequence;
 
       const imageId = imageIds.find(imageId => {
         const sopCommonModule = cornerstone.metaData.get(
-            "sopCommonModule",
-            imageId
+          'sopCommonModule',
+          imageId
         );
         if (!sopCommonModule) {
-            return;
+          return;
         }
 
         return sopCommonModule.sopInstanceUID === ReferencedSOPInstanceUID;
@@ -486,15 +505,13 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
         continue;
       }
 
-      const sourceImageMetadata = cornerstone.metaData.get(
-        "instance",
-        imageId
-      );
+      const sourceImageMetadata = cornerstone.metaData.get('instance', imageId);
       if (
         segMetadata.Rows !== sourceImageMetadata.Rows ||
         segMetadata.Columns !== sourceImageMetadata.Columns
       ) {
-        const warningMessage = 'The segmentation ' +
+        const warningMessage =
+          'The segmentation ' +
           'has frames with different geometry ' +
           'dimensions (Rows and Columns) respect to the source images.';
         warningsList.push(warningMessage);
@@ -503,14 +520,15 @@ const _checkForSeriesInconsistencesWarnings = async function (displaySet, studie
     }
 
     if (warningsList.length !== 0) {
-      const warningMessage = 'The segmentation format is not supported yet. ' +
+      const warningMessage =
+        'The segmentation format is not supported yet. ' +
         'The segmentation data (segments) could not be loaded.';
       warningsList.push(warningMessage);
     }
   }
 
   return warningsList;
-}
+};
 
 /**
  * What types are these? Why do we have "mapping" dropped in here instead of in
@@ -551,7 +569,10 @@ const _mapStudiesToThumbnails = function(studies) {
         altImageText = displaySet.Modality ? displaySet.Modality : 'UN';
       }
 
-      const hasWarnings = _checkForSeriesInconsistencesWarnings(displaySet, studies);
+      const hasWarnings = _checkForSeriesInconsistencesWarnings(
+        displaySet,
+        studies
+      );
 
       return {
         imageId,
