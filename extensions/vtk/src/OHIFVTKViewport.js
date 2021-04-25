@@ -514,7 +514,6 @@ class OHIFVTKViewport extends Component {
             />
           )}
         </div>
-        )}
         {childrenWithProps}
       </>
     );
