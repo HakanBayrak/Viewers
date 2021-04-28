@@ -2,15 +2,14 @@ import React from 'react';
 import { asyncComponent, retryImport } from '@ohif/ui';
 import commandsModule from './commandsModule.js';
 import toolbarModule from './toolbarModule.js';
-import withCommandsManager from './withCommandsManager.js';
 
 // This feels weird
 // import loadLocales from './loadLocales';
 const version = '1.0.0';
 
-const OHIFVTKVRViewport = asyncComponent(() =>
+const OHIFVTKVrViewport = asyncComponent(() =>
   retryImport(() =>
-    import(/* webpackChunkName: "OHIFVTKVRViewport" */ './OHIFVTKVRViewport.js')
+    import(/* webpackChunkName: "OHIFVTKVRViewport" */ './OHIFVTKVrViewport.js')
   )
 );
 
@@ -18,18 +17,18 @@ const vtkVrExtension = {
   /**
    * Only required property. Should be a unique value across all extensions.
    */
-  id: 'vtk-vr',
+  id: 'vtk_vr',
   version,
 
   getViewportModule({ commandsManager, servicesManager }) {
     const ExtendedVTKVRViewport = props => (
-      <OHIFVTKVRViewport
+      <OHIFVTKVrViewport
         {...props}
         servicesManager={servicesManager}
         commandsManager={commandsManager}
       />
     );
-    return withCommandsManager(ExtendedVTKVRViewport, commandsManager);
+    return ExtendedVTKVRViewport;
   },
   getToolbarModule() {
     return toolbarModule;

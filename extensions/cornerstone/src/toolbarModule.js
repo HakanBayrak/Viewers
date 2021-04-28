@@ -246,6 +246,15 @@ const definitions = [
     commandName: 'setCornerstoneLayout',
     context: 'ACTIVE_VIEWPORT::VTK',
   },
+  {
+    id: 'Exit3DVR',
+    label: 'Exit 3D VR',
+    icon: 'times',
+    //
+    type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    commandName: 'setCornerstoneLayout',
+    context: 'ACTIVE_VIEWPORT::VTK_VR',
+  },
 ];
 
 export default {

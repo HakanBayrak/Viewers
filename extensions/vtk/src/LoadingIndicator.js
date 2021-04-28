@@ -1,5 +1,4 @@
 import './LoadingIndicator.css';
-
 import React, { PureComponent } from 'react';
 import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
@@ -19,7 +18,7 @@ class LoadingIndicator extends PureComponent {
   render() {
     let percComplete;
     if (this.props.percentComplete && this.props.percentComplete !== 100) {
-      percComplete = `${this.props.percentComplete}%`;
+      percComplete = `%${this.props.percentComplete}`;
     }
     const { t } = this.props;
     return (
