@@ -1,34 +1,40 @@
-import cornerstone from 'cornerstone-core';
+// import a from '../../../platform/ui/src/elements/Icon/icons/adjust.svg';
+// import cornerstone from 'cornerstone-core';
 import setVRLayout from './utils/setVRLayout.js';
-import throttle from 'lodash.throttle';
-import { vtkInteractorStyleMPRWindowLevel } from 'react-vtkjs-viewport';
 import applyPreset from './utils/applyPreset';
 import presets from './presets.js';
+import vtkInteractorStyleManipulator from 'vtk.js/Sources/Interaction/Style/InteractorStyleManipulator';
+import Manipulators from 'vtk.js/Sources/Interaction/Manipulators';
+import {
+  toLowHighRange,
+  toWindowLevel,
+} from './utils/windowLevelRangeConverter.js';
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
   const { UINotificationService, LoggerService } = servicesManager.services;
   let defaultVOI;
   let apis = {};
+  let defaultIStyle = {};
 
-  function getVOIFromCornerstoneViewport() {
-    const dom = commandsManager.runCommand('getActiveViewportEnabledElement');
-    const cornerstoneElement = cornerstone.getEnabledElement(dom);
+  // function getVOIFromCornerstoneViewport() {
+  //   const dom = commandsManager.runCommand('getActiveViewportEnabledElement');
+  //   const cornerstoneElement = cornerstone.getEnabledElement(dom);
 
-    if (cornerstoneElement) {
-      const imageId = cornerstoneElement.image.imageId;
+  //   if (cornerstoneElement) {
+  //     const imageId = cornerstoneElement.image.imageId;
 
-      const Modality = cornerstone.metaData.get('Modality', imageId);
+  //     const Modality = cornerstone.metaData.get('Modality', imageId);
 
-      if (Modality !== 'PT') {
-        const { windowWidth, windowCenter } = cornerstoneElement.viewport.voi;
+  //     if (Modality !== 'PT') {
+  //       const { windowWidth, windowCenter } = cornerstoneElement.viewport.voi;
 
-        return {
-          windowWidth,
-          windowCenter,
-        };
-      }
-    }
-  }
+  //       return {
+  //         windowWidth,
+  //         windowCenter,
+  //       };
+  //     }
+  //   }
+  // }
 
   function setVOI(voi) {
     const { windowWidth, windowCenter } = voi;
@@ -39,11 +45,11 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       .getProperty()
       .getRGBTransferFunction(0);
 
-    // rgbTransferFunction.setRange(lower, upper);
-    rgbTransferFunction.setMappingRange(lower, upper);
-    apis[0].genericRenderWindow.getRenderWindow().render();
-    // apis.forEach(api => {
-    //   api.updateVOI(windowWidth, windowCenter);
+    rgbTransferFunction.setRange(lower, upper);
+
+    apis.forEach(api => {
+      api._component.updateVOI(windowWidth, windowCenter);
+    });
   }
 
   const actions = {
@@ -62,33 +68,88 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     enableLevelTool: () => {
       function updateVOI(apis, windowWidth, windowCenter) {
         apis.forEach(api => {
-          api.updateVOI(windowWidth, windowCenter);
+          api._component.updateVOI(windowWidth, windowCenter);
         });
       }
+      const actor = apis[0].volumes[0];
+      const range = actor
+        .getProperty()
+        .getRGBTransferFunction(0)
+        .getMappingRange()
+        .slice();
+      let levels = toWindowLevel(...range);
+      defaultVOI = levels;
 
-      const throttledUpdateVOIs = throttle(updateVOI, 16, { trailing: true }); // ~ 60 fps
+      const wMin = range[0];
+      const wMax = range[1];
 
-      const callbacks = {
-        setOnLevelsChanged: ({ windowCenter, windowWidth }) => {
-          apis.forEach(api => {
-            const renderWindow = api.genericRenderWindow.getRenderWindow();
+      const wGet = () => {
+        return levels.windowCenter;
+      };
+      const getWindowLevel = () => {
+        const r = actor
+          .getProperty()
+          .getRGBTransferFunction(0)
+          .getMappingRange()
+          .slice();
+        return toWindowLevel(...r);
+      };
+      const setWindowLevel = (windowWidth, windowCenter) => {
+        const lowHigh = toLowHighRange(windowWidth, windowCenter);
 
-            renderWindow.render();
-          });
+        levels.windowWidth = windowWidth;
+        levels.windowCenter = windowCenter;
 
-          throttledUpdateVOIs(apis, windowWidth, windowCenter);
-        },
+        actor
+          .getProperty()
+          .getRGBTransferFunction(0)
+          .setMappingRange(lowHigh.lower, lowHigh.upper);
+        updateVOI(apis, windowWidth, windowCenter);
       };
 
-      apis.forEach((api, apiIndex) => {
-        const istyle = vtkInteractorStyleMPRWindowLevel.newInstance();
+      const wSet = value => {
+        const l = getWindowLevel();
+        setWindowLevel(l.windowWidth, value);
+      };
 
-        api.setInteractorStyle({
-          istyle,
-          callbacks,
-          configuration: { apis, apiIndex, uid: api.uid },
-        });
-      });
+      const lMin = 0.01;
+      const lMax = range[1] - range[0];
+
+      const lGet = () => {
+        return levels.windowWidth;
+      };
+      const lSet = value => {
+        const l = getWindowLevel();
+        setWindowLevel(value, l.windowCenter);
+      };
+      const rangeManipulator = Manipulators.vtkMouseRangeManipulator.newInstance(
+        {
+          button: 1,
+          scrollEnabled: false,
+        }
+      );
+      rangeManipulator.setVerticalListener(wMin, wMax, 1, wGet, wSet);
+      rangeManipulator.setHorizontalListener(lMin, lMax, 1, lGet, lSet);
+
+      const iStyle = vtkInteractorStyleManipulator.newInstance();
+      iStyle.addMouseManipulator(rangeManipulator);
+
+      const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
+      renderWindow.getInteractor().setInteractorStyle(iStyle);
+      apis[0].container.style.cursor = `url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" aria-labelledby="title" width="2em" height="2em" fill="green" stroke="green" > <title id="title">Level</title> <path d="M14.5,3.5 a1 1 0 0 1 -11,11 Z" stroke="none" opacity="0.8" /> <circle cx="9" cy="9" r="8" fill="none" stroke-width="2" /> </svg>'), auto`;
+    },
+    resetVRView: () => {
+      if (defaultVOI) {
+        setVOI(defaultVOI);
+      }
+      apis[0].container.style.cursor = 'pointer';
+      const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
+      if (defaultIStyle) {
+        renderWindow.getInteractor().setInteractorStyle(defaultIStyle);
+      }
+      // const iStyle = interactor.getInteractorStyle();
+      // const n = iStyle.getNumberOfMouseManipulators();
+      // iStyle.removeMouseManipulator(n - 1);
     },
     VR3d: async ({ viewports }) => {
       const displaySet =
@@ -103,20 +164,25 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
           },
         },
       ];
-      // Get current VOI if cornerstone viewport.
-      const cornerstoneVOI = getVOIFromCornerstoneViewport();
-      defaultVOI = cornerstoneVOI;
+      // // Get current VOI if cornerstone viewport.
+      // const cornerstoneVOI = getVOIFromCornerstoneViewport();
+      // defaultVOI = cornerstoneVOI;
       try {
         apis = await setVRLayout(displaySet, viewportProps, 1, 1);
       } catch (error) {
         throw new Error(error);
       }
-      if (cornerstoneVOI) {
-        setVOI(cornerstoneVOI);
-      }
+      // if (cornerstoneVOI) {
+      //   setVOI(cornerstoneVOI);
+      // }
+
       // Check if we have full WebGL 2 support
       const firstApi = apis[0];
-      const openGLRenderWindow = apis[0].genericRenderWindow.getOpenGLRenderWindow();
+
+      const renderWindow = firstApi.genericRenderWindow.getRenderWindow();
+      defaultIStyle = renderWindow.getInteractor().getInteractorStyle();
+
+      const openGLRenderWindow = firstApi.genericRenderWindow.getOpenGLRenderWindow();
 
       if (!openGLRenderWindow.getWebgl2()) {
         // Throw a warning if we don't have WebGL 2 support,

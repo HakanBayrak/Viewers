@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import presets from '../presets.js';
-import { Select } from '@ohif/ui';
+import { OldSelect } from '@ohif/ui';
+import { useTranslation } from 'react-i18next';
 
 import './apply-preset-toolbar-component.styl';
 
-let initialCtTransferFunctionPresetId = 'vtkMRMLVolumePropertyNode4';
+let initialCtTransferFunctionPresetId = 'vtkMRMLVolumePropertyNode20';
 
 const ctTransferFunctionPresetOptions = presets.map(preset => {
   return { key: preset.name, value: preset.id };
@@ -17,15 +18,16 @@ function ApplyPresetToolbarComponent({
   button,
   activeButtons,
   isActive,
-  className,
 }) {
   const [ctTransferFunctionPresetId, setCtTransferFunctionPresetId] = useState(
     initialCtTransferFunctionPresetId
   );
 
-  const handleChangeCTTransferFunction = event => {
-    if (event.target.value !== ctTransferFunctionPresetId) {
-      setCtTransferFunctionPresetId(event.target.value);
+  const { t } = useTranslation('VtkVr');
+
+  const handleChangeCTTransferFunction = selectedPresetId => {
+    if (selectedPresetId !== ctTransferFunctionPresetId) {
+      setCtTransferFunctionPresetId(selectedPresetId);
     }
     initialCtTransferFunctionPresetId = '';
   };
@@ -42,15 +44,15 @@ function ApplyPresetToolbarComponent({
   }, [ctTransferFunctionPresetId, toolbarClickCallback]);
 
   return (
-    <div className={className}>
-      <div className="container">
-        <Select
-          key="toolbar-select"
-          options={ctTransferFunctionPresetOptions}
-          value={ctTransferFunctionPresetId}
-          onChange={handleChangeCTTransferFunction}
-        ></Select>
-      </div>
+    <div className="apply-preset-container">
+      <label htmlFor="toolbar-select">{t('Presets')}</label>
+      <OldSelect
+        id="toolbar-select"
+        key="toolbar-select"
+        options={ctTransferFunctionPresetOptions}
+        value={ctTransferFunctionPresetId}
+        onChange={handleChangeCTTransferFunction}
+      ></OldSelect>
     </div>
   );
 }

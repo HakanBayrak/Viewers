@@ -23,19 +23,19 @@ const definitions = [
     commandName: 'applyCtTransferFunctionPresetId',
     type: TOOLBAR_BUTTON_TYPES.COMMAND,
   },
-  // {
-  //   id: 'ResetVR',
-  //   label: 'Reset',
-  //   icon: 'reset',
-  //   //
-  //   type: TOOLBAR_BUTTON_TYPES.COMMAND,
-  //   commandName: 'resetVRView',
-  //   commandOptions: {},
-  // },
+  {
+    id: 'ResetVR',
+    label: 'Reset',
+    icon: 'reset',
+    //
+    type: TOOLBAR_BUTTON_TYPES.COMMAND,
+    commandName: 'resetVRView',
+    commandOptions: {},
+  },
   {
     id: '3DVR',
     label: '3D VR',
-    icon: 'cube',
+    icon: 'cubes-solid',
     //
     CustomComponent: VTKVRToolbarButton,
     type: TOOLBAR_BUTTON_TYPES.COMMAND,

@@ -21,12 +21,15 @@ import circleNotch from './icons/circle-notch.svg';
 import circleO from './icons/circle-o.svg';
 import clipboard from './icons/clipboard.svg';
 import cog from './icons/cog.svg';
+import codepenBrands from './icons/codepen-brands.svg';
 import createComment from './icons/create-comment.svg';
 import createScreenCapture from './icons/create-screen-capture.svg';
 import crosshairs from './icons/crosshairs.svg';
 import cube from './icons/cube.svg';
+import cubesSolid from './icons/cubes-solid.svg';
 import d3Rotate from './icons/3d-rotate.svg';
 import database from './icons/database.svg';
+import diceD20Solid from './icons/dice-d20-solid.svg';
 import dotCircle from './icons/dot-circle.svg';
 import edit from './icons/edit.svg';
 import ellipseCircle from './icons/ellipse-circle.svg';
@@ -36,7 +39,8 @@ import exclamationCircle from './icons/exclamation-circle.svg';
 import exclamationTriangle from './icons/exclamation-triangle.svg';
 import fastBackward from './icons/fast-backward.svg';
 import fastForward from './icons/fast-forward.svg';
-import stop from './icons/stop.svg';
+import gemRegular from './icons/gem-regular.svg';
+import gemSolid from './icons/gem-solid.svg';
 import info from './icons/info.svg';
 import inlineEdit from './icons/inline-edit.svg';
 import level from './icons/level.svg';
@@ -68,6 +72,8 @@ import saveRegular from './icons/save-regular.svg';
 import scissors from './icons/scissors.svg';
 import search from './icons/search.svg';
 import searchPlus from './icons/search-plus.svg';
+import sketchBrands from './icons/sketch-brands.svg';
+import skullSolid from './icons/skull-solid.svg';
 import softTissue from './icons/soft-tissue.svg';
 import sort from './icons/sort.svg';
 import sortDown from './icons/sort-down.svg';
@@ -77,6 +83,7 @@ import squareO from './icons/square-o.svg';
 import star from './icons/star.svg';
 import stepBackward from './icons/step-backward.svg';
 import stepForward from './icons/step-forward.svg';
+import stop from './icons/stop.svg';
 import sun from './icons/sun.svg';
 import th from './icons/th.svg';
 import thLarge from './icons/th-large.svg';
@@ -103,7 +110,14 @@ const ICONS = {
   sphere,
   'sort-down': sortDown,
   info,
+  'codepen-brands': codepenBrands,
   cube,
+  'cubes-solid': cubesSolid,
+  'dice-d20-solid': diceD20Solid,
+  'gem-regular': gemRegular,
+  'gem-solid': gemSolid,
+  'sketch-brands': sketchBrands,
+  'skull-solid': skullSolid,
   crosshairs,
   'dot-circle': dotCircle,
   'angle-left': angleLeft,

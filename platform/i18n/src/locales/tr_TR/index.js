@@ -8,6 +8,7 @@ import MeasurementTable from './MeasurementTable.json';
 import StudyList from './StudyList.json';
 import UserPreferencesModal from './UserPreferencesModal.json';
 import ViewportDownloadForm from './ViewportDownloadForm.json';
+import VtkVr from './vtkVr.json';
 
 export default {
   'tr-TR': {
@@ -21,5 +22,6 @@ export default {
     StudyList,
     UserPreferencesModal,
     ViewportDownloadForm,
+    VtkVr,
   },
 };

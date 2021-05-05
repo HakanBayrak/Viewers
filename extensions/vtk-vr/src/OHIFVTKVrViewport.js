@@ -18,11 +18,53 @@ const { StackManager } = OHIF.utils;
 const { setViewportActive } = OHIF.redux.actions;
 let apis = [];
 
+export const getCornerstoneStack = (
+  studies,
+  StudyInstanceUID,
+  displaySetInstanceUID,
+  SOPInstanceUID,
+  frameIndex
+) => {
+  // Create shortcut to displaySet
+  const study = studies.find(
+    study => study.StudyInstanceUID === StudyInstanceUID
+  );
+
+  const displaySet = study.displaySets.find(set => {
+    return set.displaySetInstanceUID === displaySetInstanceUID;
+  });
+
+  // Get stack from Stack Manager
+  const storedStack = StackManager.findOrCreateStack(study, displaySet);
+
+  // Clone the stack here so we don't mutate it
+  const stack = Object.assign({}, storedStack);
+
+  if (frameIndex !== undefined) {
+    stack.currentImageIdIndex = frameIndex;
+  } else if (SOPInstanceUID) {
+    const index = stack.imageIds.findIndex(imageId => {
+      const imageIdSOPInstanceUID = cornerstone.metaData.get(
+        'SOPInstanceUID',
+        imageId
+      );
+
+      return imageIdSOPInstanceUID === SOPInstanceUID;
+    });
+
+    if (index > -1) {
+      stack.currentImageIdIndex = index;
+    }
+  } else {
+    stack.currentImageIdIndex = 0;
+  }
+
+  return stack;
+};
+
 const OHIFVTKVrViewport = props => {
   const [volumeRenderingVolumes, setVolumeRenderingVolumes] = useState(null);
-  const [ctTransferFunctionPresetId, setCtTransferFunctionPresetId] = useState(
-    'vtkMRMLVolumePropertyNode4'
-  );
+  const [ctTransferFunctionPresetId] = useState('vtkMRMLVolumePropertyNode20');
   // const [petColorMapId, setPetColorMapId] = useState('hsv');
   const [percentComplete, setPercentComplete] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -36,50 +78,6 @@ const OHIFVTKVrViewport = props => {
       viewports[0].vtk_vr.afterCreation(api);
     }
     apis = [api];
-  };
-
-  const getCornerstoneStack = (
-    studies,
-    StudyInstanceUID,
-    displaySetInstanceUID,
-    SOPInstanceUID,
-    frameIndex
-  ) => {
-    // Create shortcut to displaySet
-    const study = studies.find(
-      study => study.StudyInstanceUID === StudyInstanceUID
-    );
-
-    const displaySet = study.displaySets.find(set => {
-      return set.displaySetInstanceUID === displaySetInstanceUID;
-    });
-
-    // Get stack from Stack Manager
-    const storedStack = StackManager.findOrCreateStack(study, displaySet);
-
-    // Clone the stack here so we don't mutate it
-    const stack = Object.assign({}, storedStack);
-
-    if (frameIndex !== undefined) {
-      stack.currentImageIdIndex = frameIndex;
-    } else if (SOPInstanceUID) {
-      const index = stack.imageIds.findIndex(imageId => {
-        const imageIdSOPInstanceUID = cornerstone.metaData.get(
-          'SOPInstanceUID',
-          imageId
-        );
-
-        return imageIdSOPInstanceUID === SOPInstanceUID;
-      });
-
-      if (index > -1) {
-        stack.currentImageIdIndex = index;
-      }
-    } else {
-      stack.currentImageIdIndex = 0;
-    }
-
-    return stack;
   };
 
   function createActorMapper(imageData) {
@@ -162,40 +160,40 @@ const OHIFVTKVrViewport = props => {
           setPercentComplete(_percentComplete);
         }
 
-        if (_percentComplete % 20 === 0) {
+        if ((_percentComplete % 20 === 0) & (_percentComplete < 100)) {
           rerenderAll();
         }
       };
 
       const onAllPixelDataInsertedCallback = () => {
-        rerenderAll();
         setIsLoading(false);
+        setTimeout(rerenderAll, 100); // Beklemezsek son okunan %20 henuz tam hazır olmadığından render olmuyor. Süre yetersiz gelirse 500 ms. yapılabilir.
       };
 
       imageDataObject.onPixelDataInserted(onPixelDataInsertedCallback);
       imageDataObject.onAllPixelDataInserted(onAllPixelDataInsertedCallback);
-
       return imageDataObject;
     },
     [isLoading, percentComplete, rerenderAll]
   );
 
   useEffect(() => {
-    const { studies, displaySet } = props.viewportData;
-    const {
-      StudyInstanceUID,
-      displaySetInstanceUID,
-      SOPInstanceUID,
-      frameIndex,
-    } = displaySet;
-    const stack = getCornerstoneStack(
-      studies,
-      StudyInstanceUID,
-      displaySetInstanceUID,
-      SOPInstanceUID,
-      frameIndex
-    );
-    if (!volumeRenderingVolumes) {
+    if (!isLoading && !volumeRenderingVolumes) {
+      const { studies, displaySet } = props.viewportData;
+      const {
+        StudyInstanceUID,
+        displaySetInstanceUID,
+        SOPInstanceUID,
+        frameIndex,
+      } = displaySet;
+      const stack = getCornerstoneStack(
+        studies,
+        StudyInstanceUID,
+        displaySetInstanceUID,
+        SOPInstanceUID,
+        frameIndex
+      );
+
       const ctImageDataObject = loadDataset(
         stack.imageIds,
         displaySetInstanceUID
@@ -207,14 +205,15 @@ const OHIFVTKVrViewport = props => {
       );
       setVolumeRenderingVolumes([ctVolVR]);
       dispatch(setViewportActive(0));
+      // return () => setPercentComplete(0);
     }
-    // return () => setPercentComplete(0);
   }, [
     createCT3dPipeline,
     ctTransferFunctionPresetId,
     dispatch,
     loadDataset,
     props.viewportData,
+    isLoading,
     volumeRenderingVolumes,
   ]);
 

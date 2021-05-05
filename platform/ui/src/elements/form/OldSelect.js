@@ -20,7 +20,7 @@ class Select extends Component {
     return (
       <select
         className="select-ohif"
-        value={this.state.selected}
+        value={this.state.value}
         onChange={this.handleChange}
       >
         {this.props.options.map(({ key, value }) => {
