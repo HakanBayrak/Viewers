@@ -1,5 +1,19 @@
-import vtkColorTransferFunction from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction';
-import vtkPiecewiseFunction from 'vtk.js/Sources/Common/DataModel/PiecewiseFunction';
+// import vtkColorTransferFunction from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction';
+// import vtkPiecewiseFunction from 'vtk.js/Sources/Common/DataModel/PiecewiseFunction';
+import vtkLookupTableProxy from 'vtk.js/Sources/Proxy/Core/LookupTableProxy';
+import vtkPiecewiseFunctionProxy from 'vtk.js/Sources/Proxy/Core/PiecewiseFunctionProxy';
+import PwfProxyConstants from 'vtk.js/Sources/Proxy/Core/PiecewiseFunctionProxy/Constants';
+import LookupTableProxyConstants from 'vtk.js/Sources/Proxy/Core/LookupTableProxy/Constants';
+
+const { Mode: PwfMode } = PwfProxyConstants;
+
+const { Mode: LookupMode } = LookupTableProxyConstants;
+
+export const applyPresetParameters = {
+  shift: 0,
+  shiftRange: [],
+  preset: null,
+};
 
 function getShiftRange(colorTransferArray) {
   // Credit to paraview-glance
@@ -23,18 +37,17 @@ function getShiftRange(colorTransferArray) {
 }
 
 function applyPointsToRGBFunction(points, range, cfun) {
-  const width = range[1] - range[0];
-  const rescaled = points.map(([x, r, g, b]) => [
-    x * width + range[0],
-    r,
-    g,
-    b,
-  ]);
+  // const width = range[1] - range[0];
+  // const rescaled = points.map(([x, r, g, b]) => [
+  //   x * width + range[0],
+  //   r,
+  //   g,
+  //   b,
+  // ]);
 
   cfun.removeAllPoints();
-  rescaled.forEach(([x, r, g, b]) => cfun.addRGBPoint(x, r, g, b));
-
-  return rescaled;
+  points.forEach(([x, r, g, b, y, z]) => cfun.addRGBPoint(x, r, g, b, y, z));
+  return points;
 }
 
 function applyPointsToPiecewiseFunction(points, range, pwf) {
@@ -43,21 +56,29 @@ function applyPointsToPiecewiseFunction(points, range, pwf) {
 
   pwf.removeAllPoints();
   rescaled.forEach(([x, y]) => pwf.addPoint(x, y));
-
   return rescaled;
 }
 
-export default function applyPreset(actor, preset) {
+export const applyPreset = (actor, pset) => {
   // Create color transfer function
+  applyPresetParameters.preset = pset;
+  const { preset } = applyPresetParameters;
   const colorTransferArray = preset.colorTransfer
     .split(' ')
     .splice(1)
     .map(parseFloat);
 
-  const { shiftRange } = getShiftRange(colorTransferArray);
+  applyPresetParameters.shiftRange = getShiftRange(
+    colorTransferArray
+  ).shiftRange;
+  const { shiftRange } = applyPresetParameters;
   let min = shiftRange[0];
+  let max = shiftRange[1];
   const width = shiftRange[1] - shiftRange[0];
-  const cfun = vtkColorTransferFunction.newInstance();
+  const lutProxy = vtkLookupTableProxy.newInstance();
+  lutProxy.setMode(LookupMode.RGBPoints);
+  const cfun = lutProxy.getLookupTable();
+
   const normColorTransferValuePoints = [];
   for (let i = 0; i < colorTransferArray.length; i += 4) {
     let value = colorTransferArray[i];
@@ -65,34 +86,54 @@ export default function applyPreset(actor, preset) {
     const g = colorTransferArray[i + 2];
     const b = colorTransferArray[i + 3];
 
-    value = (value - min) / width;
-    normColorTransferValuePoints.push([value, r, g, b]);
+    // value = (value - min) / width;
+    normColorTransferValuePoints.push([value, r, g, b, 0.5, 0.9]);
   }
 
-  applyPointsToRGBFunction(normColorTransferValuePoints, shiftRange, cfun);
+  // applyPointsToRGBFunction(normColorTransferValuePoints, shiftRange, cfun);
 
+  min += applyPresetParameters.shift;
+  max += applyPresetParameters.shift;
+
+  if (applyPresetParameters.shift !== 0) {
+    lutProxy.setRGBPoints(normColorTransferValuePoints);
+    lutProxy.setDataRange(min, max);
+  } else {
+    applyPointsToRGBFunction(normColorTransferValuePoints, shiftRange, cfun);
+  }
   actor.getProperty().setRGBTransferFunction(0, cfun);
+  // cfun.setMappingRange(min, max);
+  // cfun.updateRange();
 
   // Create scalar opacity function
   const scalarOpacityArray = preset.scalarOpacity
     .split(' ')
     .splice(1)
     .map(parseFloat);
-
-  const ofun = vtkPiecewiseFunction.newInstance();
+  const pwfProxy = vtkPiecewiseFunctionProxy.newInstance();
+  const ofun = pwfProxy.getPiecewiseFunction();
+  pwfProxy.setMode(PwfMode.Points);
   const normPoints = [];
   for (let i = 0; i < scalarOpacityArray.length; i += 2) {
     let value = scalarOpacityArray[i];
     const opacity = scalarOpacityArray[i + 1];
 
-    value = (value - min) / width;
+    value = (value - shiftRange[0]) / width;
 
     normPoints.push([value, opacity]);
   }
 
-  applyPointsToPiecewiseFunction(normPoints, shiftRange, ofun);
+  // applyPointsToPiecewiseFunction(normPoints, shiftRange, ofun);
+  // pwfProxy.setDataRange(min, max);
 
+  if (applyPresetParameters.shift !== 0) {
+    pwfProxy.setPoints(normPoints);
+    pwfProxy.setDataRange(min, max);
+  } else {
+    applyPointsToPiecewiseFunction(normPoints, shiftRange, ofun);
+  }
   actor.getProperty().setScalarOpacity(0, ofun);
+  // applyPointsToPiecewiseFunction(normPoints, [min, max], ofun);
 
   const [
     gradientMinValue,
@@ -126,4 +167,4 @@ export default function applyPreset(actor, preset) {
   actor.getProperty().setDiffuse(diffuse);
   actor.getProperty().setSpecular(specular);
   actor.getProperty().setSpecularPower(specularPower);
-}
+};

@@ -16,5 +16,6 @@
   "Stop": "Остановить",
   "StudyDate": "Дата исследования",
   "StudyList": "Список исследований",
-  "Today": "Сегодня"
+  "Today": "Сегодня",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

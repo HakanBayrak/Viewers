@@ -6,5 +6,6 @@
   "Play": "Play",
   "Previous": "Précédent",
   "Reset": "Reset",
-  "Stop": "Stop"
+  "Stop": "Stop",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

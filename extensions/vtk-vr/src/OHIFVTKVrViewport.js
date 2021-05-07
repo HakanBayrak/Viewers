@@ -12,7 +12,7 @@ import presets from './presets.js';
 import vtkVolumeMapper from 'vtk.js/Sources/Rendering/Core/VolumeMapper';
 import vtkVolume from 'vtk.js/Sources/Rendering/Core/Volume';
 import LoadingIndicator from './LoadingIndicator.js';
-import applyPreset from './utils/applyPreset';
+import { applyPreset } from './utils/applyPreset';
 
 const { StackManager } = OHIF.utils;
 const { setViewportActive } = OHIF.redux.actions;
@@ -64,7 +64,7 @@ export const getCornerstoneStack = (
 
 const OHIFVTKVrViewport = props => {
   const [volumeRenderingVolumes, setVolumeRenderingVolumes] = useState(null);
-  const [ctTransferFunctionPresetId] = useState('vtkMRMLVolumePropertyNode20');
+  const [ctTransferFunctionPresetId] = useState('vtkMRMLVolumePropertyNode4');
   // const [petColorMapId, setPetColorMapId] = useState('hsv');
   const [percentComplete, setPercentComplete] = useState(0);
   const [isLoading, setIsLoading] = useState(false);

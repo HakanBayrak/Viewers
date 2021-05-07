@@ -12,5 +12,6 @@
   "Series": "Serie",
   "Show": "Zeigen",
   "Stop": "Stopp",
-  "StudyDate": "Studien Datum"
+  "StudyDate": "Studien Datum",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

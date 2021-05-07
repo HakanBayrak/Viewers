@@ -16,6 +16,15 @@ const definitions = [
     commandOptions: {},
   },
   {
+    id: 'IsoTool',
+    label: 'ISO Tool',
+    icon: 'level',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'enableISOTool',
+    commandOptions: {},
+  },
+  {
     id: 'applyPreset',
     label: 'Apply Preset',
     icon: 'later',

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import './apply-preset-toolbar-component.styl';
 
-let initialCtTransferFunctionPresetId = 'vtkMRMLVolumePropertyNode20';
+let initialCtTransferFunctionPresetId = 'vtkMRMLVolumePropertyNode4';
 
 const ctTransferFunctionPresetOptions = presets.map(preset => {
   return { key: preset.name, value: preset.id };

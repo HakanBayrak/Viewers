@@ -1,3 +1,4 @@
 {
-  "More": "Meer"
+  "More": "Meer",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

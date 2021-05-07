@@ -11,5 +11,6 @@
   "Series": "Secuencia",
   "Show": "Mostrar",
   "Stop": "Detener",
-  "StudyDate": "Fecha de estudo"
+  "StudyDate": "Fecha de estudo",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

@@ -6,5 +6,6 @@
   "Play": "プレイ",
   "Previous": "前へ",
   "Reset": "リセット",
-  "Stop": "ストップ"
+  "Stop": "ストップ",
+  "Loading...": "Loading... {{percComplete}}{{percentSign}}"
 }

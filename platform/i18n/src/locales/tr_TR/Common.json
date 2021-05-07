@@ -14,7 +14,7 @@
   "Stop": "Durdur",
   "StudyDate": "Çekim Tarihi",
   "Download": "İndir",
-  "Loading...": "Yükleniyor...",
+  "Loading...": "Yükleniyor... {{percentSign}}{{percComplete}}",
   "Error Loading Image": "Görüntü Yüklemede Hata",
   "An error has occurred": "Bir hata meydana geldi!",
   "No URL was specified. Use ?url=$yourURL": "URL belirtilmelidir. ?url=$URL'niz şeklinde belirtiniz.",

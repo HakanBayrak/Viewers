@@ -1,7 +1,5 @@
-// import a from '../../../platform/ui/src/elements/Icon/icons/adjust.svg';
-// import cornerstone from 'cornerstone-core';
 import setVRLayout from './utils/setVRLayout.js';
-import applyPreset from './utils/applyPreset';
+import { applyPreset, applyPresetParameters } from './utils/applyPreset';
 import presets from './presets.js';
 import vtkInteractorStyleManipulator from 'vtk.js/Sources/Interaction/Style/InteractorStyleManipulator';
 import Manipulators from 'vtk.js/Sources/Interaction/Manipulators';
@@ -9,6 +7,7 @@ import {
   toLowHighRange,
   toWindowLevel,
 } from './utils/windowLevelRangeConverter.js';
+import vtkImageMarchingCubes from 'vtk.js/Sources/Filters/General/ImageMarchingCubes';
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
   const { UINotificationService, LoggerService } = servicesManager.services;
@@ -59,7 +58,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       );
 
       const actor = apis[0].volumes[0];
-
+      applyPresetParameters.shift = 0;
       applyPreset(actor, preset);
 
       const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
@@ -78,7 +77,7 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
         .getMappingRange()
         .slice();
       let levels = toWindowLevel(...range);
-      defaultVOI = levels;
+      // defaultVOI = levels;
 
       const wMin = range[0];
       const wMax = range[1];
@@ -135,6 +134,44 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       iStyle.addMouseManipulator(rangeManipulator);
 
       const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
+      renderWindow.getInteractor().setInteractorStyle(iStyle);
+      apis[0].container.style.cursor = `url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" aria-labelledby="title" width="2em" height="2em" fill="green" stroke="green" > <title id="title">Level</title> <path d="M14.5,3.5 a1 1 0 0 1 -11,11 Z" stroke="none" opacity="0.8" /> <circle cx="9" cy="9" r="8" fill="none" stroke-width="2" /> </svg>'), auto`;
+    },
+    enableISOTool: () => {
+      const actor = apis[0].volumes[0];
+      const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
+
+      let { shiftRange, preset } = applyPresetParameters;
+
+      const iMin = shiftRange[0];
+      const iMax = shiftRange[1];
+      applyPresetParameters.shift = iMin;
+
+      function updateShiftValue(value) {
+        // const isoValue = Number(value);
+        applyPresetParameters.shift = value;
+        applyPreset(actor, preset);
+      }
+
+      const iGet = () => {
+        return applyPresetParameters.shift;
+      };
+      const iSet = value => {
+        updateShiftValue(value);
+      };
+
+      const rangeManipulator = Manipulators.vtkMouseRangeManipulator.newInstance(
+        {
+          button: 1,
+          scrollEnabled: false,
+        }
+      );
+
+      rangeManipulator.setHorizontalListener(iMin, iMax, 1, iGet, iSet);
+
+      const iStyle = vtkInteractorStyleManipulator.newInstance();
+      iStyle.addMouseManipulator(rangeManipulator);
+
       renderWindow.getInteractor().setInteractorStyle(iStyle);
       apis[0].container.style.cursor = `url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" aria-labelledby="title" width="2em" height="2em" fill="green" stroke="green" > <title id="title">Level</title> <path d="M14.5,3.5 a1 1 0 0 1 -11,11 Z" stroke="none" opacity="0.8" /> <circle cx="9" cy="9" r="8" fill="none" stroke-width="2" /> </svg>'), auto`;
     },
@@ -224,6 +261,10 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     },
     enableLevelTool: {
       commandFn: actions.enableLevelTool,
+      options: {},
+    },
+    enableISOTool: {
+      commandFn: actions.enableISOTool,
       options: {},
     },
     resetVRView: {
