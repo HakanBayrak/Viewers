@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import './apply-preset-toolbar-component.styl';
 
 let initialCtTransferFunctionPresetId = 'vtkMRMLVolumePropertyNode4';
+let click = false;
 
 const ctTransferFunctionPresetOptions = presets.map(preset => {
   return { key: preset.name, value: preset.id };
@@ -29,11 +30,12 @@ function ApplyPresetToolbarComponent({
     if (selectedPresetId !== ctTransferFunctionPresetId) {
       setCtTransferFunctionPresetId(selectedPresetId);
     }
-    initialCtTransferFunctionPresetId = '';
+    click = true;
   };
 
   useEffect(() => {
-    if (ctTransferFunctionPresetId !== initialCtTransferFunctionPresetId) {
+    if (click) {
+      click = false;
       toolbarClickCallback({
         commandName: 'applyCtTransferFunctionPresetId',
         commandOptions: {

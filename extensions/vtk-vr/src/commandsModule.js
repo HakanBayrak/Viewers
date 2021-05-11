@@ -1,13 +1,20 @@
 import setVRLayout from './utils/setVRLayout.js';
-import { applyPreset, applyPresetParameters } from './utils/applyPreset';
+import {
+  applyPointsToPiecewiseFunction,
+  applyPreset,
+  applyPresetParameters,
+} from './utils/applyPreset';
 import presets from './presets.js';
-import vtkInteractorStyleManipulator from 'vtk.js/Sources/Interaction/Style/InteractorStyleManipulator';
-import Manipulators from 'vtk.js/Sources/Interaction/Manipulators';
 import {
   toLowHighRange,
   toWindowLevel,
 } from './utils/windowLevelRangeConverter.js';
-import vtkImageMarchingCubes from 'vtk.js/Sources/Filters/General/ImageMarchingCubes';
+
+import vtkInteractorStyleManipulator from 'vtk.js/Sources/Interaction/Style/InteractorStyleManipulator';
+import Manipulators from 'vtk.js/Sources/Interaction/Manipulators';
+import vtkImageCroppingWidget from 'vtk.js/Sources/Widgets/Widgets3D/ImageCroppingWidget';
+import { ViewTypes } from 'vtk.js/Sources/Widgets/Core/WidgetManager/Constants';
+import vtkImageCropFilter from 'vtk.js/Sources/Filters/General/ImageCropFilter';
 
 const commandsModule = ({ commandsManager, servicesManager }) => {
   const { UINotificationService, LoggerService } = servicesManager.services;
@@ -108,7 +115,11 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
 
       const wSet = value => {
         const l = getWindowLevel();
-        setWindowLevel(l.windowWidth, value);
+        // 2d Cornerstone parlaklık ayarı ile uyumlu olması için yönü ters çeviriyoruz.
+        const upsideValue = l.windowCenter - (value - l.windowCenter);
+        let realValue = Math.max(wMin + 1, upsideValue); //Terslediğimiz için Range manipulator doğru hesaplayamaz minimumun altına düşmemesi lazım.
+        realValue = Math.min(wMax - 1, realValue); // maximumu geçmemesi lazım.
+        setWindowLevel(l.windowWidth, realValue);
       };
 
       const lMin = 0.01;
@@ -141,16 +152,36 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       const actor = apis[0].volumes[0];
       const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
 
-      let { shiftRange, preset } = applyPresetParameters;
+      let { shiftRange, median, sharpness } = applyPresetParameters;
 
       const iMin = shiftRange[0];
       const iMax = shiftRange[1];
-      applyPresetParameters.shift = iMin;
+      applyPresetParameters.shift = 0;
+
+      const cfun = actor.getProperty().getRGBTransferFunction(0);
+
+      const currentRange = [2];
+      const nodes = cfun.get().nodes;
+      const size = nodes.length;
+      if (size) {
+        currentRange[0] = nodes[0].x;
+        currentRange[1] = nodes[size - 1].x;
+      }
+
+      const ofun = actor.getProperty().getScalarOpacity(0);
+      const p = ofun.getDataPointer();
+      const normPoints = [];
+      for (let i = 0; i < p.length; i += 2) {
+        const value = p[i];
+        const opacity = p[i + 1];
+        normPoints.push([value, opacity, median, sharpness]);
+      }
 
       function updateShiftValue(value) {
-        // const isoValue = Number(value);
         applyPresetParameters.shift = value;
-        applyPreset(actor, preset);
+        applyPointsToPiecewiseFunction(normPoints, value, ofun);
+        cfun.setMappingRange(currentRange[0] + value, currentRange[1] + value);
+        cfun.updateRange();
       }
 
       const iGet = () => {
@@ -173,7 +204,33 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       iStyle.addMouseManipulator(rangeManipulator);
 
       renderWindow.getInteractor().setInteractorStyle(iStyle);
-      apis[0].container.style.cursor = `url('data:image/svg+xml;utf8, <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" aria-labelledby="title" width="2em" height="2em" fill="green" stroke="green" > <title id="title">Level</title> <path d="M14.5,3.5 a1 1 0 0 1 -11,11 Z" stroke="none" opacity="0.8" /> <circle cx="9" cy="9" r="8" fill="none" stroke-width="2" /> </svg>'), auto`;
+      apis[0].container.style.cursor = `url('data:image/svg+xml;utf8, <svg id="master-artboard" viewBox="0 0 1400 980" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" style="enable-background:new 0 0 1400 980;" width="3em" height="3em"><g transform="matrix(1.3467081785202026, 0, 0, 1.3467081785202026, 684.9716789253773, 273.4304045661414)"><path fill="green" d="M432 160H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zm0 256H16a16 16 0 0 0-16 16v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16v-32a16 16 0 0 0-16-16zM108.1 96h231.81A12.09 12.09 0 0 0 352 83.9V44.09A12.09 12.09 0 0 0 339.91 32H108.1A12.09 12.09 0 0 0 96 44.09V83.9A12.1 12.1 0 0 0 108.1 96zm231.81 256A12.09 12.09 0 0 0 352 339.9v-39.81A12.09 12.09 0 0 0 339.91 288H108.1A12.09 12.09 0 0 0 96 300.09v39.81a12.1 12.1 0 0 0 12.1 12.1z"/></g><g transform="matrix(1.5243285945379352, 0, 0, 1.5243285945379352, 26.245681261243433, -213.82029430492938)"><path fill="green" d="M377.941 169.941V216H134.059v-46.059c0-21.382-25.851-32.09-40.971-16.971L7.029 239.029c-9.373 9.373-9.373 24.568 0 33.941l86.059 86.059c15.119 15.119 40.971 4.411 40.971-16.971V296h243.882v46.059c0 21.382 25.851 32.09 40.971 16.971l86.059-86.059c9.373-9.373 9.373-24.568 0-33.941l-86.059-86.059c-15.119-15.12-40.971-4.412-40.971 16.97z"/></g></svg>'), auto`;
+    },
+    enableCropTool: () => {
+      const actor = apis[0].volumes[0];
+      const renderWindow = apis[0].genericRenderWindow.getRenderWindow();
+      const widgetManager = apis[0].widgetManager;
+      const cropWidget = vtkImageCroppingWidget.newInstance();
+      const viewCropWidget = widgetManager.addWidget(
+        cropWidget,
+        ViewTypes.VOLUME
+      );
+      widgetManager.enablePicking();
+      renderWindow.render();
+
+      const cropFilter = vtkImageCropFilter.newInstance();
+      const mapper = actor.getMapper();
+      const image = mapper.getInputData();
+      cropFilter.setInputData(image);
+      mapper.setInputConnection(cropFilter.getOutputPort());
+      cropFilter.setCroppingPlanes(...image.getExtent());
+
+      // update crop widget
+      cropWidget.copyImageDataDescription(image);
+      const cropState = cropWidget.getWidgetState().getCroppingPlanes();
+      cropState.onModified(() => {
+        cropFilter.setCroppingPlanes(cropState.getPlanes());
+      });
     },
     resetVRView: () => {
       if (defaultVOI) {
@@ -184,9 +241,6 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
       if (defaultIStyle) {
         renderWindow.getInteractor().setInteractorStyle(defaultIStyle);
       }
-      // const iStyle = interactor.getInteractorStyle();
-      // const n = iStyle.getNumberOfMouseManipulators();
-      // iStyle.removeMouseManipulator(n - 1);
     },
     VR3d: async ({ viewports }) => {
       const displaySet =
@@ -265,6 +319,10 @@ const commandsModule = ({ commandsManager, servicesManager }) => {
     },
     enableISOTool: {
       commandFn: actions.enableISOTool,
+      options: {},
+    },
+    enableCropTool: {
+      commandFn: actions.enableCropTool,
       options: {},
     },
     resetVRView: {

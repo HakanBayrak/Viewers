@@ -20,7 +20,7 @@
   "Invert": "Tersle",
   "Layout": "$t(Common:Layout)",
   "Length": "Uzunluk",
-  "Levels": "Seviyeler",
+  "Levels": "Seviyeler (WwWc)",
   "Magnify": "Büyüt",
   "Manual": "El kitabı",
   "Measurements": "Ölçümler",
@@ -37,8 +37,10 @@
   "Rotate Right": "Sağa Döndür",
   "Sagittal": "Sagital",
   "Save": "Kaydet",
+  "Shift Tool": "Pencere Ayarı",
   "Stack Scroll": "Yığın Kaydırma",
   "Stop": "$t(Common:Stop)",
   "Themes": "Temalar",
+  "WWWC": "Seviyeler(WwWc)",
   "Zoom": "Yakınlaştır"
 }

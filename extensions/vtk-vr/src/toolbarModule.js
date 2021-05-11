@@ -16,12 +16,21 @@ const definitions = [
     commandOptions: {},
   },
   {
-    id: 'IsoTool',
-    label: 'ISO Tool',
-    icon: 'level',
+    id: 'ShiftTool',
+    label: 'Shift Tool',
+    icon: 'soft-tissue',
     //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'enableISOTool',
+    commandOptions: {},
+  },
+  {
+    id: 'CropTool',
+    label: 'Crop Tool',
+    icon: 'brain',
+    //
+    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    commandName: 'enableCropTool',
     commandOptions: {},
   },
   {
