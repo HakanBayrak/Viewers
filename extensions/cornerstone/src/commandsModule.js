@@ -321,6 +321,7 @@ const commandsModule = ({ servicesManager }) => {
       commandFn: actions.showDownloadViewportModal,
       storeContexts: ['viewports'],
       options: {},
+      context: 'VIEWER',
     },
     getActiveViewportEnabledElement: {
       commandFn: actions.getActiveViewportEnabledElement,

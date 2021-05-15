@@ -1,0 +1,33 @@
+.crop-tool-container
+  padding-right: 10px;
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  label
+    color: var(--default-color);
+  .controller
+    width: 92px;
+    .ohif-check-container
+      margin-bottom: 5px;
+      padding-left: 18px;
+      .ohif-check-label
+        text-transform: capitalize;
+        &.disabled
+          color: grey;
+          &:hover
+            color: grey;
+        &:hover
+          color: var(--hover-color);
+        .ohif-checkbox
+          border-radius: 3px;
+          background-color: white;
+          width: 12px;
+          height: 12px;
+          top: 22%;
+          &.ohif-checked:after
+            background-color: var(--active-color);
+            top: 17%;
+            left: 17%;
+  .crop-tool-label
+    color: var(--default-color);

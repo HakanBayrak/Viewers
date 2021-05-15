@@ -6,6 +6,7 @@ export class Checkbox extends Component {
   static propTypes = {
     label: PropTypes.string.isRequired,
     checked: PropTypes.bool,
+    disabled: PropTypes.bool,
     onChange: PropTypes.func,
   };
 
@@ -42,11 +43,18 @@ export class Checkbox extends Component {
     return (
       <div className="ohif-check-container">
         <form>
-          <label className="ohif-check-label">
+          <label
+            className={
+              this.props.disabled
+                ? 'ohif-check-label disabled'
+                : 'ohif-check-label'
+            }
+          >
             <input
               type="checkbox"
               checked={this.state.checked}
               onChange={this.handleChange.bind(this)}
+              disabled={this.props.disabled}
             />
             {checkbox}
             {this.state.label}

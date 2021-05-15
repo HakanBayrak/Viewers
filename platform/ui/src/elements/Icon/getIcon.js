@@ -96,6 +96,8 @@ import youtube from './icons/youtube.svg';
 import eye from './icons/eye.svg';
 import eyeClosed from './icons/eye-closed.svg';
 import envelopeSquare from './icons/envelope-square.svg';
+import digitalOcean from './icons/digital-ocean-brands.svg';
+import crop from './icons/crop.svg';
 
 const ICONS = {
   eye,
@@ -194,6 +196,8 @@ const ICONS = {
   liver,
   save: saveRegular,
   'envelope-square': envelopeSquare,
+  'digital-ocean': digitalOcean,
+  crop,
 };
 
 /**

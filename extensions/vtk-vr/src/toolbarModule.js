@@ -1,10 +1,13 @@
 import ApplyPresetToolbarComponent from './toolbarComponents/applyPresetToolbarComponent';
+import CropToolComponent from './toolbarComponents/cropToolComponent';
 import VTKVRToolbarButton from './toolbarComponents/VTKVRToolbarButton';
 
 const TOOLBAR_BUTTON_TYPES = {
   COMMAND: 'command',
   SET_TOOL_ACTIVE: 'setToolActive',
+  BUILT_IN: 'builtIn',
 };
+
 const definitions = [
   {
     id: 'WWWCVR',
@@ -18,7 +21,7 @@ const definitions = [
   {
     id: 'ShiftTool',
     label: 'Shift Tool',
-    icon: 'soft-tissue',
+    icon: 'digital-ocean',
     //
     type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
     commandName: 'enableISOTool',
@@ -27,9 +30,10 @@ const definitions = [
   {
     id: 'CropTool',
     label: 'Crop Tool',
-    icon: 'brain',
+    icon: 'crop',
+    CustomComponent: CropToolComponent,
     //
-    type: TOOLBAR_BUTTON_TYPES.SET_TOOL_ACTIVE,
+    type: TOOLBAR_BUTTON_TYPES.COMMAND,
     commandName: 'enableCropTool',
     commandOptions: {},
   },

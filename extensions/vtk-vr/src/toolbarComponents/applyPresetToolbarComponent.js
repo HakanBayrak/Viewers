@@ -27,10 +27,10 @@ function ApplyPresetToolbarComponent({
   const { t } = useTranslation('VtkVr');
 
   const handleChangeCTTransferFunction = selectedPresetId => {
+    click = true;
     if (selectedPresetId !== ctTransferFunctionPresetId) {
       setCtTransferFunctionPresetId(selectedPresetId);
     }
-    click = true;
   };
 
   useEffect(() => {
