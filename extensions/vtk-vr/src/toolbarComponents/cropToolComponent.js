@@ -49,6 +49,7 @@ const CropToolComponent = ({
       setState({
         ...state,
         activateChecked: checked,
+        hideChecked: false,
         hideDisabled: true,
         controllerClassName: 'ohif-checkbox disabled',
       });

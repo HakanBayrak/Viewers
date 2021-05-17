@@ -11,6 +11,8 @@ const SLIDER = {
   STEP: 0.1,
 };
 
+let eventCausedEffect = false;
+
 const ToolbarLabel = props => {
   const { label } = props;
   return <div className="toolbar-button-label">{label}</div>;
@@ -24,7 +26,12 @@ const ToolbarSlider = props => {
   const { value, min, max, onChange } = props;
   return (
     <div className="toolbar-slider-container">
-      <label htmlFor="toolbar-slider">{value}mm</label>
+      <input
+        className="slider-input"
+        type="number"
+        value={value}
+        onInput={onChange}
+      />
       <Range
         value={value}
         min={min}
@@ -135,7 +142,9 @@ function SlabThicknessToolbarComponent({
   const { label, operationButtons } = button;
   const _className = _getClassNames(isActive, className);
   const selectOptions = _getSelectOptions(button);
+
   function onChangeSelect(selectedValue) {
+    eventCausedEffect = true;
     // find select value
     const operation = operationButtons.find(
       button => button.id === selectedValue
@@ -149,11 +158,17 @@ function SlabThicknessToolbarComponent({
   }
 
   function onChangeCheckbox(checked) {
+    eventCausedEffect = true;
     setState({ ...state, modeChecked: checked });
   }
 
   function onChangeSlider(event) {
-    const value = Number(event.target.value);
+    eventCausedEffect = true;
+    const n = Number(event.target.value);
+    const value =
+      Math.max(state.sliderMin, n) === state.sliderMin
+        ? state.sliderMin
+        : Math.min(n, state.sliderMax); // input'dan gelen range dışı girişleri range içinde tutmak için
 
     if (value !== state.value) {
       setState({ ...state, value, modeChecked: true });
@@ -161,22 +176,40 @@ function SlabThicknessToolbarComponent({
   }
 
   useEffect(() => {
+    // effect array'a button ve toolbarClickCallback'i VS Code otomatik ekliyor, dolayısıyla useEffect döngüye giriyor.
+    if (!eventCausedEffect) {
+      return;
+    }
+    eventCausedEffect = false;
+
     _applyModeOperation(
       state.operation,
       state.modeChecked,
       toolbarClickCallback,
       button
     );
-  }, [state.modeChecked, state.operation]);
+  }, [button, state.modeChecked, state.operation, toolbarClickCallback]);
 
   useEffect(() => {
+    // effect array'a button ve toolbarClickCallback'i VS Code otomatik ekliyor, dolayısıyla useEffect döngüye giriyor.
+    if (!eventCausedEffect) {
+      return;
+    }
+    eventCausedEffect = false;
+
     _applySlabThickness(
       state.value,
       state.modeChecked,
       toolbarClickCallback,
       button
     );
-  }, [state.operation, state.modeChecked, state.value]);
+  }, [
+    state.operation,
+    state.modeChecked,
+    state.value,
+    toolbarClickCallback,
+    button,
+  ]);
 
   return (
     <div className={_className}>
