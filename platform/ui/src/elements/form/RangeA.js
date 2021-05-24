@@ -1,4 +1,4 @@
-import './Range.css';
+import './RangeA.css';
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -6,11 +6,12 @@ import PropTypes from 'prop-types';
 class Range extends Component {
   constructor(props) {
     super(props);
-    this.state = { value: props.value || 0 };
+    // this.state = { value: props.value || 0 };
   }
 
   handleChange = event => {
-    this.setState({ value: event.target.value });
+    // this.setState({ value: event.target.value });
+    // this.props.value = event.target.value;
     if (this.props.onChange) this.props.onChange(event);
   };
 
@@ -19,7 +20,7 @@ class Range extends Component {
       <>
         <input
           type="range"
-          value={this.state.value}
+          value={this.props.value}
           min={this.props.min}
           max={this.props.max}
           step={this.props.step || 1}

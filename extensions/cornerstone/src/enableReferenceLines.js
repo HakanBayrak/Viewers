@@ -15,7 +15,6 @@ const getNewContext = csTools.importInternal('drawing/getNewContext');
 const enableReferenceLines = () => {
   const renderReferenceLines = ({ detail: { enabledElement } }) => {
     const { activeViewportIndex } = window.store.getState().viewports;
-
     // Active viewport is not changing until a tool is actually being used, not just the viewport being selected..
 
     if (getEnabledElement(activeViewportIndex) !== enabledElement.element) {

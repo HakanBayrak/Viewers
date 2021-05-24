@@ -43,6 +43,7 @@ import {
   OldSelect,
   Label,
   Range,
+  RangeA,
   TextArea,
   TextInput,
 } from './elements';
@@ -95,6 +96,7 @@ export {
   PageToolbar,
   QuickSwitch,
   Range,
+  RangeA,
   RoundedButtonGroup,
   ScrollableArea,
   Select,

@@ -5,6 +5,7 @@ import OHIF from '@ohif/core';
 import setCornerstoneLayout from './utils/setCornerstoneLayout.js';
 import { getEnabledElement } from './state';
 import CornerstoneViewportDownloadForm from './CornerstoneViewportDownloadForm';
+
 const scroll = cornerstoneTools.import('util/scroll');
 
 const { studyMetadataManager } = OHIF.utils;
@@ -285,6 +286,28 @@ const commandsModule = ({ servicesManager }) => {
 
       displaySet.SOPInstanceUID = SOPInstanceUID;
       displaySet.frameIndex = frameIndex;
+
+      const imagePosition =
+        displaySet.images[frameIndex]._instance.metadata.ImagePositionPatient;
+
+      // const imagePosition2 = convertToVector3(
+      //   displaySet.images[frameIndex + 1]._instance.metadata
+      //     .ImagePositionPatient
+      // );
+
+      // const distance = imagePosition2.distanceTo(imagePosition);
+
+      const imageOrientation =
+        displaySet.images[frameIndex]._instance.metadata
+          .ImageOrientationPatient;
+      window.parent.postMessage(
+        {
+          position: imagePosition,
+          orientation: imageOrientation,
+          studyUid: StudyInstanceUID,
+        },
+        '*'
+      );
 
       window.store.dispatch(
         setViewportSpecificData(activeViewportIndex, displaySet)

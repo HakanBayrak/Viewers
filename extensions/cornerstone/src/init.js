@@ -6,6 +6,7 @@ import merge from 'lodash.merge';
 import initCornerstoneTools from './initCornerstoneTools.js';
 import measurementServiceMappingsFactory from './utils/measurementServiceMappings/measurementServiceMappingsFactory';
 import enableReferenceLines from './enableReferenceLines';
+import { initSyncronizerEvents } from './initIFrameScrollLock.js';
 
 /**
  *
@@ -89,6 +90,8 @@ export default function init({ servicesManager, configuration }) {
   _connectToolsToMeasurementService(MeasurementService);
 
   enableReferenceLines();
+
+  initSyncronizerEvents();
 
   /* Add extension tools configuration here. */
   const internalToolsConfig = {
